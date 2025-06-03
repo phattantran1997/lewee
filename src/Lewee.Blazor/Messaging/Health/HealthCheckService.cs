@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Lewee.Blazor.Logging;
+using Microsoft.Extensions.Logging;
 
 namespace Lewee.Blazor.Messaging.Health;
 
@@ -15,7 +16,8 @@ internal class HealthCheckService
 
     public async Task<bool> IsServerHealthy(CancellationToken cancellationToken = default)
     {
-        this.logger.LogDebug("Checking server health {ServerBaseAddress}", this.httpClient.BaseAddress);
+        string baseAddress = this.httpClient.BaseAddress?.ToString() ?? "unknown";
+        this.logger.LogCheckingServerHealthWithAddress(baseAddress);
 
         try
         {
@@ -24,7 +26,7 @@ internal class HealthCheckService
         }
         catch (Exception ex)
         {
-            this.logger.LogError(ex, "Failed health check");
+            this.logger.LogHealthCheckFailed(LogLevel.Error, ex);
             return false;
         }
     }

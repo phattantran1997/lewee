@@ -2,7 +2,7 @@
 using Lewee.Domain;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
-using Serilog;
+using Microsoft.Extensions.Logging;
 
 namespace Lewee.Infrastructure.Data;
 
@@ -18,16 +18,16 @@ internal class DomainEventDispatcher<TContext>
 
     private readonly IDbContextFactory<TContext> dbContextFactory;
     private readonly IMediator mediator;
-    private readonly ILogger logger;
+    private readonly ILogger<DomainEventDispatcher<TContext>> logger;
 
     public DomainEventDispatcher(
         IDbContextFactory<TContext> dbContextFactory,
         IMediator mediator,
-        ILogger logger)
+        ILogger<DomainEventDispatcher<TContext>> logger)
     {
         this.dbContextFactory = dbContextFactory;
         this.mediator = mediator;
-        this.logger = logger.ForContext<DomainEventDispatcher<TContext>>();
+        this.logger = logger;
     }
 
     public async Task DispatchEvents(CancellationToken cancellationToken)
@@ -86,9 +86,7 @@ internal class DomainEventDispatcher<TContext>
 
                 if (domainEvent == null)
                 {
-                    this.logger.Warning(
-                        "Could not deserialize DomainEventReference {Id}",
-                        domainEventReference.Id);
+                    this.logger.CouldNotDeserializeDomainEvent(LogLevel.Warning, domainEventReference.Id);
                 }
                 else
                 {
